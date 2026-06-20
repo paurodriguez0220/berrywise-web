@@ -28,6 +28,6 @@ export const Balances: Story = {
   args: { activeTab: 'balances' },
 };
 
-export const Settle: Story = {
-  args: { activeTab: 'settle' },
+export const Trends: Story = {
+  args: { activeTab: 'trends' },
 };

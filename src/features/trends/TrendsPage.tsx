@@ -44,7 +44,10 @@ export function TrendsPage(): React.JSX.Element {
                 width={72}
               />
               <Tooltip
-                formatter={(value: number) => [formatCurrency(value), 'Total']}
+                formatter={(value) => [
+                  typeof value === 'number' ? formatCurrency(value) : String(value),
+                  'Total',
+                ]}
                 contentStyle={{ borderRadius: '12px', border: '1px solid #f3f4f6', fontSize: 12 }}
                 cursor={{ fill: '#fef2f2' }}
               />
