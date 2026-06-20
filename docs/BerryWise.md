@@ -134,7 +134,7 @@ npm run build
 npm run deploy   # pushes dist/ to gh-pages branch via gh-pages package
 ```
 
-Live at: `https://paurodriguez0220.github.io/berrywise/`
+Live at: `https://paurodriguez0220.github.io/berrywise-web/`
 
 ---
 

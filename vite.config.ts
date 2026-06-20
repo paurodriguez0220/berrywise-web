@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: '/berrywise/',
+  base: '/berrywise-web/',
   plugins: [
     react(),
     tailwindcss(),
@@ -13,7 +13,7 @@ export default defineConfig({
       manifest: {
         name: 'BerryWise',
         short_name: 'BerryWise',
-        start_url: '/berrywise/',
+        start_url: '/berrywise-web/',
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#e63946',

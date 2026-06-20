@@ -104,7 +104,7 @@ Track progress by checking off tasks as they are completed.
   - Remote: `https://github.com/paurodriguez0220/berrywise-web.git`
   - Push `main` branch
 
-- [ ] **#18** Deploy to GitHub Pages *(blocked by #4, #15, #16, #17)*
+- [x] **#18** Deploy to GitHub Pages *(blocked by #4, #15, #16, #17)*
   ```bash
   npm run build
   npm run deploy
@@ -123,7 +123,7 @@ Track progress by checking off tasks as they are completed.
 
 | | |
 |---|---|
-| Live URL | `https://paurodriguez0220.github.io/berrywise/` |
+| Live URL | `https://paurodriguez0220.github.io/berrywise-web/` |
 | Repo | `https://github.com/paurodriguez0220/berrywise-web` |
 | DB | Turso · `berrywise` |
 | Stack | Vite + React + TypeScript + Tailwind + @libsql/client |
