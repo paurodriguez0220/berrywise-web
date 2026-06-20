@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getExpenses, addExpense, updateExpense, deleteExpense } from '../../db/expenses';
 import { addSplits, deleteSplitsForExpense, type NewSplit } from '../../db/splits';
-import type { Expense } from '../../types';
+import type { Expense, ExpenseCategory } from '../../types';
 
 interface UseExpensesResult {
   expenses: Expense[];
   isLoading: boolean;
   error: string | undefined;
-  add: (description: string, amount: number, paidBy: number, splits: NewSplit[]) => Promise<void>;
-  update: (id: number, description: string, amount: number, paidBy: number, splits: NewSplit[]) => Promise<void>;
+  add: (description: string, amount: number, paidBy: number, category: ExpenseCategory, splits: NewSplit[]) => Promise<void>;
+  update: (id: number, description: string, amount: number, paidBy: number, category: ExpenseCategory, splits: NewSplit[]) => Promise<void>;
   remove: (id: number) => Promise<void>;
   refetch: () => Promise<void>;
 }
@@ -31,9 +31,9 @@ export function useExpenses(): UseExpensesResult {
   }, []);
 
   const add = useCallback(
-    async (description: string, amount: number, paidBy: number, splits: NewSplit[]): Promise<void> => {
+    async (description: string, amount: number, paidBy: number, category: ExpenseCategory, splits: NewSplit[]): Promise<void> => {
       try {
-        const expenseId = await addExpense(description, amount, paidBy);
+        const expenseId = await addExpense(description, amount, paidBy, category);
         await addSplits(expenseId, splits);
         await refetch();
       } catch (err) {
@@ -45,10 +45,10 @@ export function useExpenses(): UseExpensesResult {
   );
 
   const update = useCallback(
-    async (id: number, description: string, amount: number, paidBy: number, splits: NewSplit[]): Promise<void> => {
+    async (id: number, description: string, amount: number, paidBy: number, category: ExpenseCategory, splits: NewSplit[]): Promise<void> => {
       try {
         await deleteSplitsForExpense(id);
-        await updateExpense(id, description, amount, paidBy);
+        await updateExpense(id, description, amount, paidBy, category);
         await addSplits(id, splits);
         await refetch();
       } catch (err) {

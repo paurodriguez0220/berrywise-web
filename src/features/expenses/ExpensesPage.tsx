@@ -4,7 +4,12 @@ import { useMembers } from '../members/use-members';
 import { AddExpenseModal, type InitialExpenseValues } from './AddExpenseModal';
 import { getSplitsForExpense } from '../../db/splits';
 import { formatCurrency } from '../../utils/currency';
+import { CATEGORIES } from '../../types';
 import type { Expense } from '../../types';
+
+function getCategoryEmoji(expense: Expense): string {
+  return CATEGORIES.find((c) => c.value === expense.category)?.emoji ?? '📦';
+}
 
 export function ExpensesPage(): React.JSX.Element {
   const { expenses, isLoading, error, add, update, remove } = useExpenses();
@@ -32,6 +37,7 @@ export function ExpensesPage(): React.JSX.Element {
         description: expense.description,
         amount: expense.amount,
         paidBy: expense.paidBy,
+        category: expense.category,
         splits: splits.map((s) => ({ memberId: s.memberId, share: s.share })),
       });
     } catch (err) {
@@ -61,11 +67,14 @@ export function ExpensesPage(): React.JSX.Element {
                 loadingExpenseId === expense.id ? 'opacity-50' : 'cursor-pointer'
               }`}
             >
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium text-gray-900">{expense.description}</span>
-                <span className="text-xs text-gray-400">
-                  {getMemberName(expense.paidBy)} paid · {formatDate(expense.createdAt)}
-                </span>
+              <div className="flex items-center gap-3">
+                <span className="text-xl leading-none">{getCategoryEmoji(expense)}</span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-sm font-medium text-gray-900">{expense.description}</span>
+                  <span className="text-xs text-gray-400">
+                    {getMemberName(expense.paidBy)} paid · {formatDate(expense.createdAt)}
+                  </span>
+                </div>
               </div>
               <span className="text-sm font-semibold text-gray-900">
                 {formatCurrency(expense.amount)}
@@ -88,7 +97,7 @@ export function ExpensesPage(): React.JSX.Element {
       {isModalOpen && members.length > 0 && (
         <AddExpenseModal
           members={members}
-          onSave={add}
+          onSave={(desc, amt, paidBy, category, splits) => add(desc, amt, paidBy, category, splits)}
           onClose={() => setIsModalOpen(false)}
         />
       )}
@@ -109,12 +118,8 @@ export function ExpensesPage(): React.JSX.Element {
         <AddExpenseModal
           members={members}
           initialValues={editingExpense}
-          onSave={async (desc, amt, paidBy, splits) => {
-            await update(editingExpense.id, desc, amt, paidBy, splits);
-          }}
-          onDelete={async (id) => {
-            await remove(id);
-          }}
+          onSave={(desc, amt, paidBy, category, splits) => update(editingExpense.id, desc, amt, paidBy, category, splits)}
+          onDelete={(id) => remove(id)}
           onClose={() => setEditingExpense(null)}
         />
       )}

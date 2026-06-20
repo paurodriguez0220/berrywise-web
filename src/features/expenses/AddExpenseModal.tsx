@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import type { Member } from '../../types';
+import type { Member, ExpenseCategory } from '../../types';
+import { CATEGORIES } from '../../types';
 import type { NewSplit } from '../../db/splits';
 import { formatCurrency } from '../../utils/currency';
 
@@ -12,12 +13,13 @@ export interface InitialExpenseValues {
   description: string;
   amount: number;
   paidBy: number;
+  category: ExpenseCategory;
   splits: NewSplit[];
 }
 
 export interface AddExpenseModalProps {
   members: Member[];
-  onSave: (description: string, amount: number, paidBy: number, splits: NewSplit[]) => Promise<void>;
+  onSave: (description: string, amount: number, paidBy: number, category: ExpenseCategory, splits: NewSplit[]) => Promise<void>;
   onClose: () => void;
   initialValues?: InitialExpenseValues;
   onDelete?: (id: number) => Promise<void>;
@@ -37,6 +39,7 @@ export function AddExpenseModal({
   const [paidBy, setPaidBy] = useState<number | null>(
     initialValues?.paidBy ?? members[0]?.id ?? null,
   );
+  const [category, setCategory] = useState<ExpenseCategory>(initialValues?.category ?? 'other');
   const [splitType, setSplitType] = useState<SplitType>(isEditMode ? 'custom' : 'equal');
   const [customShares, setCustomShares] = useState<Record<number, string>>(() => {
     const initial: Record<number, string> = {};
@@ -95,7 +98,7 @@ export function AddExpenseModal({
     if (typeof result === 'string') { setValidationError(result); return; }
     setIsSaving(true);
     try {
-      await onSave(description.trim(), total, paidBy, result);
+      await onSave(description.trim(), total, paidBy, category, result);
       onClose();
     } catch (err) {
       setValidationError(err instanceof Error ? err.message : 'Failed to save');
@@ -140,6 +143,33 @@ export function AddExpenseModal({
             placeholder="Description"
             className="min-h-11 rounded-xl border border-gray-200 px-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
           />
+
+          {/* Category picker */}
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map((cat) => {
+              const isSelected = category === cat.value;
+              const isBerry = cat.value === 'berry';
+              return (
+                <button
+                  key={cat.value}
+                  type="button"
+                  onClick={() => setCategory(cat.value)}
+                  className={`flex items-center gap-1 px-3 min-h-9 rounded-full text-xs font-medium transition active:scale-95 ${
+                    isSelected
+                      ? isBerry
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-red-500 text-white'
+                      : isBerry
+                      ? 'border border-purple-300 text-purple-600'
+                      : 'border border-gray-200 text-gray-600'
+                  }`}
+                >
+                  <span>{cat.emoji}</span>
+                  <span>{cat.label}</span>
+                </button>
+              );
+            })}
+          </div>
 
           <input
             type="number"

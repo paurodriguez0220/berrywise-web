@@ -46,9 +46,27 @@ export const EditMode: Story = {
       description: 'Dinner at Jollibee',
       amount: 850,
       paidBy: 1,
+      category: 'food',
       splits: [
         { memberId: 1, share: 425 },
         { memberId: 2, share: 425 },
+      ],
+    },
+    onDelete: fn(),
+  },
+};
+
+export const BerryExpense: Story = {
+  args: {
+    initialValues: {
+      id: 2,
+      description: "Baby's checkup",
+      amount: 1500,
+      paidBy: 1,
+      category: 'berry',
+      splits: [
+        { memberId: 1, share: 750 },
+        { memberId: 2, share: 750 },
       ],
     },
     onDelete: fn(),
@@ -59,10 +77,11 @@ export const CustomSplit: Story = {
   args: {
     members: threeMembers,
     initialValues: {
-      id: 2,
+      id: 3,
       description: 'Grocery run',
       amount: 1200,
       paidBy: 2,
+      category: 'grocery',
       splits: [
         { memberId: 1, share: 600 },
         { memberId: 2, share: 400 },
@@ -76,10 +95,11 @@ export const CustomSplit: Story = {
 export const ConfirmDelete: Story = {
   args: {
     initialValues: {
-      id: 3,
+      id: 4,
       description: 'Coffee',
       amount: 180,
       paidBy: 1,
+      category: 'food',
       splits: [
         { memberId: 1, share: 90 },
         { memberId: 2, share: 90 },
@@ -96,10 +116,11 @@ export const ConfirmDelete: Story = {
 export const ValidationError: Story = {
   args: {
     initialValues: {
-      id: 4,
+      id: 5,
       description: 'Team lunch',
       amount: 500,
       paidBy: 1,
+      category: 'food',
       splits: [
         { memberId: 1, share: 100 },
         { memberId: 2, share: 100 },

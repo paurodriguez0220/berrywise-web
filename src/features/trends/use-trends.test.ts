@@ -10,20 +10,21 @@ import { useTrends } from './use-trends';
 
 const mockGetExpenses = vi.mocked(getExpenses);
 
-function makeExpense(amount: number, createdAt: string, id = 1) {
-  return { id, description: 'Test', amount, paidBy: 1, createdAt };
+function makeExpense(amount: number, createdAt: string, id = 1, category = 'other' as const) {
+  return { id, description: 'Test', amount, paidBy: 1, category, createdAt };
 }
 
 beforeEach(() => {
   vi.resetAllMocks();
 });
 
-describe('useTrends', () => {
+describe('useTrends — monthly points', () => {
   it('returns empty points when there are no expenses', async () => {
     mockGetExpenses.mockResolvedValue([]);
     const { result } = renderHook(() => useTrends());
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.points).toEqual([]);
+    expect(result.current.categoryPoints).toEqual([]);
   });
 
   it('groups expenses by month and sums totals', async () => {
@@ -69,5 +70,53 @@ describe('useTrends', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.error).toBe('DB error');
     expect(result.current.points).toEqual([]);
+  });
+});
+
+describe('useTrends — category points', () => {
+  it('groups expenses by category and sums totals', async () => {
+    mockGetExpenses.mockResolvedValue([
+      makeExpense(500, '2025-01-01T00:00:00.000Z', 1, 'food'),
+      makeExpense(300, '2025-01-02T00:00:00.000Z', 2, 'food'),
+      makeExpense(200, '2025-01-03T00:00:00.000Z', 3, 'grocery'),
+    ]);
+    const { result } = renderHook(() => useTrends());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    const food = result.current.categoryPoints.find((p) => p.value === 'food');
+    const grocery = result.current.categoryPoints.find((p) => p.value === 'grocery');
+    expect(food?.total).toBe(800);
+    expect(grocery?.total).toBe(200);
+  });
+
+  it('only includes categories with a non-zero total', async () => {
+    mockGetExpenses.mockResolvedValue([
+      makeExpense(100, '2025-01-01T00:00:00.000Z', 1, 'rent'),
+    ]);
+    const { result } = renderHook(() => useTrends());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.categoryPoints).toHaveLength(1);
+    expect(result.current.categoryPoints[0].value).toBe('rent');
+  });
+
+  it('sorts categories by total descending', async () => {
+    mockGetExpenses.mockResolvedValue([
+      makeExpense(100, '2025-01-01T00:00:00.000Z', 1, 'grocery'),
+      makeExpense(500, '2025-01-02T00:00:00.000Z', 2, 'rent'),
+      makeExpense(200, '2025-01-03T00:00:00.000Z', 3, 'food'),
+    ]);
+    const { result } = renderHook(() => useTrends());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    const totals = result.current.categoryPoints.map((p) => p.total);
+    expect(totals).toEqual([...totals].sort((a, b) => b - a));
+  });
+
+  it('gives berry category a purple fill color', async () => {
+    mockGetExpenses.mockResolvedValue([
+      makeExpense(100, '2025-01-01T00:00:00.000Z', 1, 'berry'),
+    ]);
+    const { result } = renderHook(() => useTrends());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    const berry = result.current.categoryPoints.find((p) => p.value === 'berry');
+    expect(berry?.fill).toBe('#7c3aed');
   });
 });
