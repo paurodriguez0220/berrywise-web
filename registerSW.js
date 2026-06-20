@@ -1,1 +1,1 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/berrywise/sw.js', { scope: '/berrywise/' })})}
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/berrywise-web/sw.js', { scope: '/berrywise-web/' })})}

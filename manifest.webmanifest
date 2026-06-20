@@ -1,1 +1,1 @@
-{"name":"BerryWise","short_name":"BerryWise","start_url":"/berrywise/","display":"standalone","background_color":"#ffffff","theme_color":"#e63946","lang":"en","scope":"/berrywise/","icons":[{"src":"/icons/apple-touch-icon.png","sizes":"180x180","type":"image/png"}]}
+{"name":"BerryWise","short_name":"BerryWise","start_url":"/berrywise-web/","display":"standalone","background_color":"#ffffff","theme_color":"#e63946","lang":"en","scope":"/berrywise-web/","icons":[{"src":"/icons/apple-touch-icon.png","sizes":"180x180","type":"image/png"}]}
