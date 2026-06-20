@@ -119,6 +119,28 @@ Track progress by checking off tasks as they are completed.
 
 ---
 
+## Phase 6 — New Features
+
+- [ ] **#20** Login screen *(no signup — single shared passcode or PIN)*
+  - `LoginScreen.tsx` — shown before the app when not authenticated
+  - Store session in `localStorage` (key: `berrywise_auth`)
+  - Simple PIN or passphrase — no user accounts needed
+  - Storybook story: `LoginScreen.stories.ts`
+
+- [ ] **#21** Philippine Peso currency *(blocked by #2)*
+  - Replace all `$` symbols with `₱` throughout the app
+  - Format amounts using `toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })`
+  - Update `AddExpenseModal`, `BalancesPage`, `SettlePage`, `ExpensesPage`
+
+- [ ] **#22** Edit and delete transactions *(blocked by #12)*
+  - Edit expense: tap expense card → edit modal (same fields as AddExpenseModal)
+  - Delete expense: swipe-to-delete or delete button in edit modal
+  - DB: `UPDATE expenses` and `DELETE FROM expenses WHERE id = ?` + cascade delete splits
+  - `expenses.ts`: `updateExpense(id, description, amount, paidBy)`, `deleteExpense(id)`
+  - `splits.ts`: `deleteSplitsForExpense(expenseId)` (called before update/delete)
+
+---
+
 ## Quick Reference
 
 | | |
