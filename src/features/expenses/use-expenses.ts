@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getExpenses, addExpense, updateExpense, deleteExpense } from '../../db/expenses';
-import { addSplits, deleteSplitsForExpense, type NewSplit } from '../../db/splits';
-import type { Expense, ExpenseCategory } from '../../types';
+import { addSplits, deleteSplitsForExpense, getAllSplits, type NewSplit } from '../../db/splits';
+import type { Expense, ExpenseCategory, Split } from '../../types';
 
 interface UseExpensesResult {
   expenses: Expense[];
+  splits: Split[];
   isLoading: boolean;
   error: string | undefined;
   add: (description: string, amount: number, paidBy: number, category: ExpenseCategory, splits: NewSplit[]) => Promise<void>;
@@ -15,6 +16,7 @@ interface UseExpensesResult {
 
 export function useExpenses(): UseExpensesResult {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [splits, setSplits] = useState<Split[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
 
@@ -22,7 +24,9 @@ export function useExpenses(): UseExpensesResult {
     setIsLoading(true);
     setError(undefined);
     try {
-      setExpenses(await getExpenses());
+      const [fetchedExpenses, fetchedSplits] = await Promise.all([getExpenses(), getAllSplits()]);
+      setExpenses(fetchedExpenses);
+      setSplits(fetchedSplits);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load expenses');
     } finally {
@@ -31,10 +35,10 @@ export function useExpenses(): UseExpensesResult {
   }, []);
 
   const add = useCallback(
-    async (description: string, amount: number, paidBy: number, category: ExpenseCategory, splits: NewSplit[]): Promise<void> => {
+    async (description: string, amount: number, paidBy: number, category: ExpenseCategory, newSplits: NewSplit[]): Promise<void> => {
       try {
         const expenseId = await addExpense(description, amount, paidBy, category);
-        await addSplits(expenseId, splits);
+        await addSplits(expenseId, newSplits);
         await refetch();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to add expense');
@@ -45,11 +49,11 @@ export function useExpenses(): UseExpensesResult {
   );
 
   const update = useCallback(
-    async (id: number, description: string, amount: number, paidBy: number, category: ExpenseCategory, splits: NewSplit[]): Promise<void> => {
+    async (id: number, description: string, amount: number, paidBy: number, category: ExpenseCategory, newSplits: NewSplit[]): Promise<void> => {
       try {
         await deleteSplitsForExpense(id);
         await updateExpense(id, description, amount, paidBy, category);
-        await addSplits(id, splits);
+        await addSplits(id, newSplits);
         await refetch();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to update expense');
@@ -77,5 +81,5 @@ export function useExpenses(): UseExpensesResult {
     void refetch();
   }, [refetch]);
 
-  return { expenses, isLoading, error, add, update, remove, refetch };
+  return { expenses, splits, isLoading, error, add, update, remove, refetch };
 }

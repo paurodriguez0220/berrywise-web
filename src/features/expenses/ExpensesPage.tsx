@@ -5,14 +5,31 @@ import { AddExpenseModal, type InitialExpenseValues } from './AddExpenseModal';
 import { getSplitsForExpense } from '../../db/splits';
 import { formatCurrency } from '../../utils/currency';
 import { CATEGORIES } from '../../types';
-import type { Expense } from '../../types';
+import type { Expense, Split } from '../../types';
+
+const SPLIT_TOLERANCE = 0.01;
+
+function expenseSplits(expenseId: number, allSplits: Split[]): Split[] {
+  return allSplits.filter((s) => s.expenseId === expenseId);
+}
+
+function isEqualSplit(splits: Split[]): boolean {
+  if (splits.length <= 1) return true;
+  const shares = splits.map((s) => s.share);
+  return Math.max(...shares) - Math.min(...shares) < SPLIT_TOLERANCE;
+}
+
+function owedAmount(expense: Expense, splits: Split[]): number {
+  const payerShare = splits.find((s) => s.memberId === expense.paidBy)?.share ?? 0;
+  return parseFloat((expense.amount - payerShare).toFixed(2));
+}
 
 function getCategoryEmoji(expense: Expense): string {
   return CATEGORIES.find((c) => c.value === expense.category)?.emoji ?? '📦';
 }
 
 export function ExpensesPage(): React.JSX.Element {
-  const { expenses, isLoading, error, add, update, remove } = useExpenses();
+  const { expenses, splits, isLoading, error, add, update, remove } = useExpenses();
   const { members } = useMembers();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<InitialExpenseValues | null>(null);
@@ -59,28 +76,39 @@ export function ExpensesPage(): React.JSX.Element {
         <p className="text-sm text-gray-400 text-center py-8">No expenses yet. Tap + to add one.</p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {expenses.map((expense) => (
-            <li
-              key={expense.id}
-              onClick={() => { if (!loadingExpenseId) void handleTapExpense(expense); }}
-              className={`flex items-center justify-between min-h-16 rounded-xl bg-white border border-gray-100 px-4 shadow-sm transition active:scale-[0.98] ${
-                loadingExpenseId === expense.id ? 'opacity-50' : 'cursor-pointer'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xl leading-none">{getCategoryEmoji(expense)}</span>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium text-gray-900">{expense.description}</span>
-                  <span className="text-xs text-gray-400">
-                    {getMemberName(expense.paidBy)} paid · {formatDate(expense.createdAt)}
-                  </span>
+          {expenses.map((expense) => {
+            const thisSplits = expenseSplits(expense.id, splits);
+            const equalSplit = isEqualSplit(thisSplits);
+            const owed = owedAmount(expense, thisSplits);
+            const isSettlement = expense.description.startsWith('Settlement:');
+            return (
+              <li
+                key={expense.id}
+                onClick={() => { if (!loadingExpenseId) void handleTapExpense(expense); }}
+                className={`flex items-center justify-between min-h-16 rounded-xl bg-white border border-gray-100 px-4 shadow-sm transition active:scale-[0.98] ${
+                  loadingExpenseId === expense.id ? 'opacity-50' : 'cursor-pointer'
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-xl leading-none shrink-0">{getCategoryEmoji(expense)}</span>
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-sm font-medium text-gray-900 truncate">{expense.description}</span>
+                    <span className="text-xs text-gray-400">
+                      {getMemberName(expense.paidBy)} paid{equalSplit ? ', split equally' : ''} · {formatDate(expense.createdAt)}
+                    </span>
+                    {!isSettlement && owed > 0 && (
+                      <span className="text-xs text-green-600 font-medium">
+                        {getMemberName(expense.paidBy)} is owed {formatCurrency(owed)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <span className="text-sm font-semibold text-gray-900">
-                {formatCurrency(expense.amount)}
-              </span>
-            </li>
-          ))}
+                <span className="text-sm font-semibold text-gray-900 shrink-0 ml-2">
+                  {formatCurrency(expense.amount)}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
 
