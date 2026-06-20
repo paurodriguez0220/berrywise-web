@@ -91,7 +91,7 @@ Track progress by checking off tasks as they are completed.
   - `Layout.tsx` — wraps pages with safe area padding
   - `App.tsx` — standalone gate check + tab routing
 
-- [ ] **#16** Add PWA icon asset *(blocked by #2)*
+- [x] **#16** Add PWA icon asset *(blocked by #2)*
   - Place 180×180px PNG at `public/icons/apple-touch-icon.png`
   - Berry-themed preferred; iOS applies rounded corners automatically
 
