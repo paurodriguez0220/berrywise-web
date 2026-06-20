@@ -5,14 +5,18 @@ export function MembersPage(): React.JSX.Element {
   const { members, isLoading, error, add } = useMembers();
   const [name, setName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [addError, setAddError] = useState<string | undefined>();
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     if (!name.trim()) return;
     setIsSaving(true);
+    setAddError(undefined);
     try {
       await add(name);
       setName('');
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to add member');
     } finally {
       setIsSaving(false);
     }
@@ -40,7 +44,7 @@ export function MembersPage(): React.JSX.Element {
         </button>
       </form>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {(error ?? addError) && <p className="text-sm text-red-500">{error ?? addError}</p>}
 
       {isLoading ? (
         <p className="text-sm text-gray-400 text-center py-8">Loading…</p>

@@ -4,7 +4,7 @@ import type { NewSplit } from '../../db/splits';
 
 type SplitType = 'equal' | 'custom';
 
-interface AddExpenseModalProps {
+export interface AddExpenseModalProps {
   members: Member[];
   onSave: (description: string, amount: number, paidBy: number, splits: NewSplit[]) => Promise<void>;
   onClose: () => void;
@@ -13,25 +13,32 @@ interface AddExpenseModalProps {
 export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalProps): React.JSX.Element {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [paidBy, setPaidBy] = useState<number>(members[0]?.id ?? 0);
+  const [paidBy, setPaidBy] = useState<number | null>(members[0]?.id ?? null);
   const [splitType, setSplitType] = useState<SplitType>('equal');
   const [customShares, setCustomShares] = useState<Record<number, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | undefined>();
 
   useEffect(() => {
+    setPaidBy(members[0]?.id ?? null);
     const initial: Record<number, string> = {};
     members.forEach((m) => { initial[m.id] = ''; });
     setCustomShares(initial);
   }, [members]);
 
-  function buildSplits(): NewSplit[] | undefined {
+  // Returns splits array on success, error message string on failure.
+  function buildSplits(): NewSplit[] | string {
     const total = parseFloat(amount);
-    if (isNaN(total) || total <= 0) return undefined;
+    if (isNaN(total) || total <= 0) return 'Enter a valid amount';
 
     if (splitType === 'equal') {
-      const share = parseFloat((total / members.length).toFixed(2));
-      return members.map((m) => ({ memberId: m.id, share }));
+      const base = parseFloat((total / members.length).toFixed(2));
+      // Assign the floating-point remainder to the first member so splits sum exactly to total.
+      const remainder = parseFloat((total - base * members.length).toFixed(2));
+      return members.map((m, i) => ({
+        memberId: m.id,
+        share: i === 0 ? parseFloat((base + remainder).toFixed(2)) : base,
+      }));
     }
 
     const splits: NewSplit[] = members.map((m) => ({
@@ -40,8 +47,7 @@ export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalPro
     }));
     const sum = splits.reduce((acc, s) => acc + s.share, 0);
     if (Math.abs(sum - total) > 0.01) {
-      setValidationError(`Shares must add up to $${total.toFixed(2)} (current: $${sum.toFixed(2)})`);
-      return undefined;
+      return `Shares must add up to $${total.toFixed(2)} (current: $${sum.toFixed(2)})`;
     }
     return splits;
   }
@@ -52,12 +58,12 @@ export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalPro
     if (!description.trim()) { setValidationError('Description is required'); return; }
     const total = parseFloat(amount);
     if (isNaN(total) || total <= 0) { setValidationError('Enter a valid amount'); return; }
-    if (!paidBy) { setValidationError('Select who paid'); return; }
-    const splits = buildSplits();
-    if (!splits) return;
+    if (paidBy === null) { setValidationError('Select who paid'); return; }
+    const result = buildSplits();
+    if (typeof result === 'string') { setValidationError(result); return; }
     setIsSaving(true);
     try {
-      await onSave(description.trim(), total, paidBy, splits);
+      await onSave(description.trim(), total, paidBy, result);
       onClose();
     } finally {
       setIsSaving(false);
@@ -100,8 +106,8 @@ export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalPro
           />
 
           <select
-            value={paidBy}
-            onChange={(e) => setPaidBy(Number(e.target.value))}
+            value={paidBy ?? ''}
+            onChange={(e) => setPaidBy(e.target.value ? Number(e.target.value) : null)}
             className="min-h-11 rounded-xl border border-gray-200 px-4 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-red-400"
           >
             {members.map((m) => (
