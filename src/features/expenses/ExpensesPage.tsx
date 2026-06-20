@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { useExpenses } from './use-expenses';
 import { useMembers } from '../members/use-members';
-import { AddExpenseModal } from './AddExpenseModal';
+import { AddExpenseModal, type InitialExpenseValues } from './AddExpenseModal';
+import { getSplitsForExpense } from '../../db/splits';
 import { formatCurrency } from '../../utils/currency';
+import type { Expense } from '../../types';
 
 export function ExpensesPage(): React.JSX.Element {
-  const { expenses, isLoading, error, add } = useExpenses();
+  const { expenses, isLoading, error, add, update, remove } = useExpenses();
   const { members } = useMembers();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<InitialExpenseValues | null>(null);
+  const [loadingExpenseId, setLoadingExpenseId] = useState<number | null>(null);
 
   function getMemberName(id: number): string {
     return members.find((m) => m.id === id)?.name ?? 'Unknown';
@@ -15,6 +19,22 @@ export function ExpensesPage(): React.JSX.Element {
 
   function formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+
+  async function handleTapExpense(expense: Expense): Promise<void> {
+    setLoadingExpenseId(expense.id);
+    try {
+      const splits = await getSplitsForExpense(expense.id);
+      setEditingExpense({
+        id: expense.id,
+        description: expense.description,
+        amount: expense.amount,
+        paidBy: expense.paidBy,
+        splits: splits.map((s) => ({ memberId: s.memberId, share: s.share })),
+      });
+    } finally {
+      setLoadingExpenseId(null);
+    }
   }
 
   return (
@@ -32,7 +52,10 @@ export function ExpensesPage(): React.JSX.Element {
           {expenses.map((expense) => (
             <li
               key={expense.id}
-              className="flex items-center justify-between min-h-16 rounded-xl bg-white border border-gray-100 px-4 shadow-sm"
+              onClick={() => { if (!loadingExpenseId) void handleTapExpense(expense); }}
+              className={`flex items-center justify-between min-h-16 rounded-xl bg-white border border-gray-100 px-4 shadow-sm transition active:scale-[0.98] ${
+                loadingExpenseId === expense.id ? 'opacity-50' : 'cursor-pointer'
+              }`}
             >
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium text-gray-900">{expense.description}</span>
@@ -57,6 +80,7 @@ export function ExpensesPage(): React.JSX.Element {
         +
       </button>
 
+      {/* Add modal */}
       {isModalOpen && members.length > 0 && (
         <AddExpenseModal
           members={members}
@@ -74,6 +98,21 @@ export function ExpensesPage(): React.JSX.Element {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Edit modal */}
+      {editingExpense && members.length > 0 && (
+        <AddExpenseModal
+          members={members}
+          initialValues={editingExpense}
+          onSave={async (desc, amt, paidBy, splits) => {
+            await update(editingExpense.id, desc, amt, paidBy, splits);
+          }}
+          onDelete={async (id) => {
+            await remove(id);
+          }}
+          onClose={() => setEditingExpense(null)}
+        />
       )}
     </div>
   );

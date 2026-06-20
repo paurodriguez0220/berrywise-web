@@ -31,6 +31,13 @@ export async function getAllSplits(): Promise<Split[]> {
   }));
 }
 
+export async function deleteSplitsForExpense(expenseId: number): Promise<void> {
+  await db.execute({
+    sql: 'DELETE FROM expense_splits WHERE expense_id = ?',
+    args: [expenseId],
+  });
+}
+
 export async function addSplits(expenseId: number, splits: NewSplit[]): Promise<void> {
   const statements = splits.map((s) => ({
     sql: 'INSERT INTO expense_splits (expense_id, member_id, share) VALUES (?, ?, ?)',

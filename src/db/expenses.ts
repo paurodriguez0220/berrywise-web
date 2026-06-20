@@ -14,6 +14,25 @@ export async function getExpenses(): Promise<Expense[]> {
   }));
 }
 
+export async function updateExpense(
+  id: number,
+  description: string,
+  amount: number,
+  paidBy: number,
+): Promise<void> {
+  await db.execute({
+    sql: 'UPDATE expenses SET description = ?, amount = ?, paid_by = ? WHERE id = ?',
+    args: [description, amount, paidBy, id],
+  });
+}
+
+export async function deleteExpense(id: number): Promise<void> {
+  await db.execute({
+    sql: 'DELETE FROM expenses WHERE id = ?',
+    args: [id],
+  });
+}
+
 export async function addExpense(
   description: string,
   amount: number,

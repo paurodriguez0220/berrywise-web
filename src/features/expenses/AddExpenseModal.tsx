@@ -5,36 +5,65 @@ import { formatCurrency } from '../../utils/currency';
 
 type SplitType = 'equal' | 'custom';
 
+export interface InitialExpenseValues {
+  id: number;
+  description: string;
+  amount: number;
+  paidBy: number;
+  splits: NewSplit[];
+}
+
 export interface AddExpenseModalProps {
   members: Member[];
   onSave: (description: string, amount: number, paidBy: number, splits: NewSplit[]) => Promise<void>;
   onClose: () => void;
+  initialValues?: InitialExpenseValues;
+  onDelete?: (id: number) => Promise<void>;
 }
 
-export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalProps): React.JSX.Element {
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [paidBy, setPaidBy] = useState<number | null>(members[0]?.id ?? null);
-  const [splitType, setSplitType] = useState<SplitType>('equal');
-  const [customShares, setCustomShares] = useState<Record<number, string>>({});
+export function AddExpenseModal({
+  members,
+  onSave,
+  onClose,
+  initialValues,
+  onDelete,
+}: AddExpenseModalProps): React.JSX.Element {
+  const isEditMode = !!initialValues;
+
+  const [description, setDescription] = useState(initialValues?.description ?? '');
+  const [amount, setAmount] = useState(initialValues ? String(initialValues.amount) : '');
+  const [paidBy, setPaidBy] = useState<number | null>(
+    initialValues?.paidBy ?? members[0]?.id ?? null,
+  );
+  const [splitType, setSplitType] = useState<SplitType>(isEditMode ? 'custom' : 'equal');
+  const [customShares, setCustomShares] = useState<Record<number, string>>(() => {
+    const initial: Record<number, string> = {};
+    members.forEach((m) => {
+      const existing = initialValues?.splits.find((s) => s.memberId === m.id);
+      initial[m.id] = existing !== undefined ? String(existing.share) : '';
+    });
+    return initial;
+  });
+
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [validationError, setValidationError] = useState<string | undefined>();
 
   useEffect(() => {
+    if (isEditMode) return;
     setPaidBy(members[0]?.id ?? null);
     const initial: Record<number, string> = {};
     members.forEach((m) => { initial[m.id] = ''; });
     setCustomShares(initial);
-  }, [members]);
+  }, [members, isEditMode]);
 
-  // Returns splits array on success, error message string on failure.
   function buildSplits(): NewSplit[] | string {
     const total = parseFloat(amount);
     if (isNaN(total) || total <= 0) return 'Enter a valid amount';
 
     if (splitType === 'equal') {
       const base = parseFloat((total / members.length).toFixed(2));
-      // Assign the floating-point remainder to the first member so splits sum exactly to total.
       const remainder = parseFloat((total - base * members.length).toFixed(2));
       return members.map((m, i) => ({
         memberId: m.id,
@@ -66,23 +95,38 @@ export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalPro
     try {
       await onSave(description.trim(), total, paidBy, result);
       onClose();
+    } catch (err) {
+      setValidationError(err instanceof Error ? err.message : 'Failed to save');
     } finally {
       setIsSaving(false);
     }
   }
 
+  async function handleDelete(): Promise<void> {
+    if (!onDelete || !initialValues) return;
+    setIsDeleting(true);
+    try {
+      await onDelete(initialValues.id);
+      onClose();
+    } catch (err) {
+      setValidationError(err instanceof Error ? err.message : 'Failed to delete');
+      setConfirmDelete(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      {/* Sheet */}
       <div className="relative bg-white rounded-t-2xl px-4 pt-4 pb-[env(safe-area-inset-bottom)] shadow-xl">
-        {/* Handle */}
         <div className="w-10 h-1 rounded-full bg-gray-300 mx-auto mb-4" />
 
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-gray-900">Add Expense</h2>
+          <h2 className="text-base font-semibold text-gray-900">
+            {isEditMode ? 'Edit Expense' : 'Add Expense'}
+          </h2>
           <button onClick={onClose} className="min-h-11 min-w-11 flex items-center justify-center text-gray-400 text-xl">✕</button>
         </div>
 
@@ -100,7 +144,7 @@ export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalPro
             inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount ($)"
+            placeholder="Amount"
             min="0.01"
             step="0.01"
             className="min-h-11 rounded-xl border border-gray-200 px-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
@@ -116,7 +160,6 @@ export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalPro
             ))}
           </select>
 
-          {/* Split type toggle */}
           <div className="flex rounded-xl border border-gray-200 overflow-hidden">
             {(['equal', 'custom'] as SplitType[]).map((type) => (
               <button
@@ -124,9 +167,7 @@ export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalPro
                 type="button"
                 onClick={() => setSplitType(type)}
                 className={`flex-1 min-h-11 text-sm font-medium transition ${
-                  splitType === type
-                    ? 'bg-red-500 text-white'
-                    : 'bg-white text-gray-500'
+                  splitType === type ? 'bg-red-500 text-white' : 'bg-white text-gray-500'
                 }`}
               >
                 {type === 'equal' ? 'Split equally' : 'Custom split'}
@@ -162,11 +203,43 @@ export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalPro
 
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={isSaving || isDeleting}
             className="min-h-12 rounded-xl bg-red-500 text-white font-medium text-sm active:scale-95 transition disabled:opacity-50 mt-1"
           >
-            {isSaving ? 'Saving…' : 'Save Expense'}
+            {isSaving ? 'Saving…' : isEditMode ? 'Save Changes' : 'Save Expense'}
           </button>
+
+          {isEditMode && onDelete && (
+            confirmDelete ? (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(false)}
+                  disabled={isDeleting}
+                  className="flex-1 min-h-11 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium active:scale-95 transition disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex-1 min-h-11 rounded-xl bg-red-600 text-white text-sm font-medium active:scale-95 transition disabled:opacity-50"
+                >
+                  {isDeleting ? 'Deleting…' : 'Yes, delete'}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                disabled={isSaving}
+                className="min-h-11 rounded-xl border border-red-200 text-red-500 text-sm font-medium active:scale-95 transition disabled:opacity-50"
+              >
+                Delete expense
+              </button>
+            )
+          )}
         </form>
       </div>
     </div>
