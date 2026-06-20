@@ -44,15 +44,15 @@ Track progress by checking off tasks as they are completed.
   ```
   - Create `schema.sql` at repo root (members, expenses, expense_splits tables)
 
-- [ ] **#8** Implement `src/types/index.ts` *(blocked by #2)*
+- [x] **#8** Implement `src/types/index.ts` *(blocked by #2)*
   - `Member`, `Expense`, `Split`, `Balance` interfaces
   - Named exports only, no `any`
 
-- [ ] **#9** Implement Turso client `src/db/client.ts` *(blocked by #3, #6, #7)*
+- [x] **#9** Implement Turso client `src/db/client.ts` *(blocked by #3, #6, #7)*
   - Single `db` export via `createClient` from `@libsql/client/http`
   - Reads `VITE_TURSO_URL` and `VITE_TURSO_TOKEN` from `import.meta.env`
 
-- [ ] **#10** Implement DB query layer `src/db/` *(blocked by #8, #9)*
+- [x] **#10** Implement DB query layer `src/db/` *(blocked by #8, #9)*
   - `members.ts` → `getMembers`, `addMember`
   - `expenses.ts` → `getExpenses`, `addExpense`
   - `splits.ts` → `getSplitsForExpense`, `addSplits`
@@ -62,22 +62,22 @@ Track progress by checking off tasks as they are completed.
 
 ## Phase 3 — Features
 
-- [ ] **#11** Build Members feature *(blocked by #10)*
+- [x] **#11** Build Members feature *(blocked by #10)*
   - `src/features/members/use-members.ts` — fetch hook with loading + refetch
   - `MembersPage.tsx` — list + add member form
   - Mobile-first Tailwind layout, 44px min touch targets
 
-- [ ] **#12** Build Expenses feature *(blocked by #10)*
+- [x] **#12** Build Expenses feature *(blocked by #10)*
   - `use-expenses.ts`, `ExpensesPage.tsx`, `AddExpenseModal.tsx`
   - Bottom sheet modal (slides up from bottom on mobile)
   - Split type: Equal (auto-divide) or Custom (per-member inputs)
   - FAB (floating action button) to open modal
 
-- [ ] **#13** Build Balances feature *(blocked by #10)*
+- [x] **#13** Build Balances feature *(blocked by #10)*
   - `use-balances.ts` — net per member = paid − owed (pure derivation, no DB write)
   - `BalancesPage.tsx` — green (owed to them) / red (owes) per person
 
-- [ ] **#14** Build Settle Up feature *(blocked by #10)*
+- [x] **#14** Build Settle Up feature *(blocked by #10)*
   - `SettlePage.tsx` — shows who owes whom
   - "Mark Settled" inserts an expense: `description = "Settlement: debtor → creditor"`, `paid_by = debtor`, single split for creditor
 
@@ -85,7 +85,7 @@ Track progress by checking off tasks as they are completed.
 
 ## Phase 4 — App Shell & PWA
 
-- [ ] **#15** Build App shell *(blocked by #11, #12, #13, #14)*
+- [x] **#15** Build App shell *(blocked by #11, #12, #13, #14)*
   - `GateScreen.tsx` — install instructions when not in standalone mode
   - `BottomNav.tsx` — fixed bottom 4-tab bar, `pb-[env(safe-area-inset-bottom)]` for home indicator
   - `Layout.tsx` — wraps pages with safe area padding
@@ -99,7 +99,7 @@ Track progress by checking off tasks as they are completed.
 
 ## Phase 5 — Ship
 
-- [ ] **#17** Create GitHub repo and push initial commit *(blocked by #15)*
+- [x] **#17** Create GitHub repo and push initial commit *(blocked by #15)*
   - Create `paurodriguez0220/berrywise-web` on GitHub
   - Remote: `https://github.com/paurodriguez0220/berrywise-web.git`
   - Push `main` branch
