@@ -10,7 +10,8 @@ function isRunningStandalone(): boolean {
 }
 
 export function App(): React.JSX.Element {
-  if (!isRunningStandalone()) {
+  // In dev mode, skip the standalone gate so you can test in the browser
+  if (!import.meta.env.DEV && !isRunningStandalone()) {
     return <GateScreen />;
   }
   return <Layout />;

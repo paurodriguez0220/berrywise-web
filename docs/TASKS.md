@@ -35,7 +35,7 @@ Track progress by checking off tasks as they are completed.
 
 ## Phase 2 — Database
 
-- [ ] **#7** Create Turso database and run schema *(can do anytime)*
+- [x] **#7** Create Turso database and run schema *(can do anytime)*
   ```bash
   turso db create berrywise
   turso db shell berrywise < schema.sql
