@@ -1,6 +1,8 @@
 import React from 'react';
 import { GateScreen } from './components/GateScreen';
+import { LoginScreen } from './components/LoginScreen';
 import { Layout } from './components/Layout';
+import { useAuth } from './auth/use-auth';
 
 function isRunningStandalone(): boolean {
   return (
@@ -10,9 +12,15 @@ function isRunningStandalone(): boolean {
 }
 
 export function App(): React.JSX.Element {
-  // In dev mode, skip the standalone gate so you can test in the browser
+  const { isAuthenticated, login } = useAuth();
+
   if (!import.meta.env.DEV && !isRunningStandalone()) {
     return <GateScreen />;
   }
+
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={login} />;
+  }
+
   return <Layout />;
 }
