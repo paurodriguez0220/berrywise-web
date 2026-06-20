@@ -14,7 +14,7 @@ Let users tag each expense with a category so spending can be organized and filt
 | `transpo` | Transport | 🚗 |
 | `rent` | Rent | 🏠 |
 | `grocery` | Grocery | 🛒 |
-| `berry` | Berry | 🫐 |
+| `berry` | Berry | 👶 |
 | `other` | Other | 📦 |
 
 `berry` is a custom category for baby expenses — treated the same as any other category in the data layer, just styled distinctly.
@@ -39,7 +39,7 @@ export const CATEGORIES: { value: ExpenseCategory; label: string; emoji: string 
   { value: 'transpo', label: 'Transport', emoji: '🚗' },
   { value: 'rent',    label: 'Rent',      emoji: '🏠' },
   { value: 'grocery', label: 'Grocery',   emoji: '🛒' },
-  { value: 'berry',   label: 'Berry',     emoji: '🫐' },
+  { value: 'berry',   label: 'Berry',     emoji: '👶' },
   { value: 'other',   label: 'Other',     emoji: '📦' },
 ];
 
