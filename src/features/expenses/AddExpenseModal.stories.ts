@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from 'storybook/test';
+import { fn, within, userEvent } from 'storybook/test';
 import { AddExpenseModal } from './AddExpenseModal';
 
 const twoMembers = [
@@ -87,9 +87,9 @@ export const ConfirmDelete: Story = {
     },
     onDelete: fn(),
   },
-  play: async ({ canvas }) => {
-    const { getByText } = await import('@testing-library/dom');
-    getByText(canvas, 'Delete expense').click();
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByText('Delete expense'));
   },
 };
 
