@@ -32,28 +32,43 @@ export function useExpenses(): UseExpensesResult {
 
   const add = useCallback(
     async (description: string, amount: number, paidBy: number, splits: NewSplit[]): Promise<void> => {
-      const expenseId = await addExpense(description, amount, paidBy);
-      await addSplits(expenseId, splits);
-      await refetch();
+      try {
+        const expenseId = await addExpense(description, amount, paidBy);
+        await addSplits(expenseId, splits);
+        await refetch();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to add expense');
+        throw err;
+      }
     },
     [refetch],
   );
 
   const update = useCallback(
     async (id: number, description: string, amount: number, paidBy: number, splits: NewSplit[]): Promise<void> => {
-      await deleteSplitsForExpense(id);
-      await updateExpense(id, description, amount, paidBy);
-      await addSplits(id, splits);
-      await refetch();
+      try {
+        await deleteSplitsForExpense(id);
+        await updateExpense(id, description, amount, paidBy);
+        await addSplits(id, splits);
+        await refetch();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to update expense');
+        throw err;
+      }
     },
     [refetch],
   );
 
   const remove = useCallback(
     async (id: number): Promise<void> => {
-      await deleteSplitsForExpense(id);
-      await deleteExpense(id);
-      await refetch();
+      try {
+        await deleteSplitsForExpense(id);
+        await deleteExpense(id);
+        await refetch();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete expense');
+        throw err;
+      }
     },
     [refetch],
   );

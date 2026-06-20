@@ -12,6 +12,7 @@ export function ExpensesPage(): React.JSX.Element {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<InitialExpenseValues | null>(null);
   const [loadingExpenseId, setLoadingExpenseId] = useState<number | null>(null);
+  const [tapError, setTapError] = useState<string | undefined>();
 
   function getMemberName(id: number): string {
     return members.find((m) => m.id === id)?.name ?? 'Unknown';
@@ -23,6 +24,7 @@ export function ExpensesPage(): React.JSX.Element {
 
   async function handleTapExpense(expense: Expense): Promise<void> {
     setLoadingExpenseId(expense.id);
+    setTapError(undefined);
     try {
       const splits = await getSplitsForExpense(expense.id);
       setEditingExpense({
@@ -32,6 +34,8 @@ export function ExpensesPage(): React.JSX.Element {
         paidBy: expense.paidBy,
         splits: splits.map((s) => ({ memberId: s.memberId, share: s.share })),
       });
+    } catch (err) {
+      setTapError(err instanceof Error ? err.message : 'Failed to load expense');
     } finally {
       setLoadingExpenseId(null);
     }
@@ -41,7 +45,7 @@ export function ExpensesPage(): React.JSX.Element {
     <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
       <h1 className="text-xl font-semibold text-gray-900">Expenses</h1>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {(error ?? tapError) && <p className="text-sm text-red-500">{error ?? tapError}</p>}
 
       {isLoading ? (
         <p className="text-sm text-gray-400 text-center py-8">Loading…</p>

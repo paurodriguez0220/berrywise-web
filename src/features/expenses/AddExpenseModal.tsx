@@ -5,6 +5,8 @@ import { formatCurrency } from '../../utils/currency';
 
 type SplitType = 'equal' | 'custom';
 
+const SPLIT_TOLERANCE = 0.01;
+
 export interface InitialExpenseValues {
   id: number;
   description: string;
@@ -76,7 +78,7 @@ export function AddExpenseModal({
       share: parseFloat(customShares[m.id] ?? '0') || 0,
     }));
     const sum = splits.reduce((acc, s) => acc + s.share, 0);
-    if (Math.abs(sum - total) > 0.01) {
+    if (Math.abs(sum - total) > SPLIT_TOLERANCE) {
       return `Shares must add up to ${formatCurrency(total)} (current: ${formatCurrency(sum)})`;
     }
     return splits;
