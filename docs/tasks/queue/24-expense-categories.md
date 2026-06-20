@@ -14,6 +14,8 @@ Let users tag each expense with a category so spending can be organized and filt
 | `transpo` | Transport | 🚗 |
 | `rent` | Rent | 🏠 |
 | `grocery` | Grocery | 🛒 |
+| `utilities` | Utilities | 💡 |
+| `health` | Health | 🏥 |
 | `berry` | Berry | 👶 |
 | `other` | Other | 📦 |
 
@@ -32,15 +34,17 @@ No migration tool needed — SQLite `ALTER TABLE ADD COLUMN` with a `DEFAULT` is
 ### Step 1 — Types (`src/types/index.ts`)
 
 ```ts
-export type ExpenseCategory = 'food' | 'transpo' | 'rent' | 'grocery' | 'berry' | 'other';
+export type ExpenseCategory = 'food' | 'transpo' | 'rent' | 'grocery' | 'utilities' | 'health' | 'berry' | 'other';
 
 export const CATEGORIES: { value: ExpenseCategory; label: string; emoji: string }[] = [
-  { value: 'food',    label: 'Food',      emoji: '🍽️' },
-  { value: 'transpo', label: 'Transport', emoji: '🚗' },
-  { value: 'rent',    label: 'Rent',      emoji: '🏠' },
-  { value: 'grocery', label: 'Grocery',   emoji: '🛒' },
-  { value: 'berry',   label: 'Berry',     emoji: '👶' },
-  { value: 'other',   label: 'Other',     emoji: '📦' },
+  { value: 'food',      label: 'Food',      emoji: '🍽️' },
+  { value: 'transpo',  label: 'Transport', emoji: '🚗' },
+  { value: 'rent',     label: 'Rent',      emoji: '🏠' },
+  { value: 'grocery',  label: 'Grocery',   emoji: '🛒' },
+  { value: 'utilities',label: 'Utilities', emoji: '💡' },
+  { value: 'health',   label: 'Health',    emoji: '🏥' },
+  { value: 'berry',    label: 'Berry',     emoji: '👶' },
+  { value: 'other',    label: 'Other',     emoji: '📦' },
 ];
 
 export interface Expense {
