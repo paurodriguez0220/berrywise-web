@@ -55,6 +55,7 @@ export function BalancesPage(): React.JSX.Element {
         `Settlement: ${s.debtorName} → ${s.creditorName}`,
         s.amount,
         s.debtorId,
+        'other',
       );
       await addSplits(expenseId, [{ memberId: s.creditorId, share: s.amount }]);
       await refetch();

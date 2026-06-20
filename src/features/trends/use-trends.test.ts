@@ -10,7 +10,7 @@ import { useTrends } from './use-trends';
 
 const mockGetExpenses = vi.mocked(getExpenses);
 
-function makeExpense(amount: number, createdAt: string, id = 1, category = 'other' as const) {
+function makeExpense(amount: number, createdAt: string, id = 1, category: import('../../types').ExpenseCategory = 'other') {
   return { id, description: 'Test', amount, paidBy: 1, category, createdAt };
 }
 
