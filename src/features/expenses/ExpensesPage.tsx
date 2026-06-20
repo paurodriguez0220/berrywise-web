@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useExpenses } from './use-expenses';
 import { useMembers } from '../members/use-members';
 import { AddExpenseModal } from './AddExpenseModal';
+import { formatCurrency } from '../../utils/currency';
 
 export function ExpensesPage(): React.JSX.Element {
   const { expenses, isLoading, error, add } = useExpenses();
@@ -40,7 +41,7 @@ export function ExpensesPage(): React.JSX.Element {
                 </span>
               </div>
               <span className="text-sm font-semibold text-gray-900">
-                ${expense.amount.toFixed(2)}
+                {formatCurrency(expense.amount)}
               </span>
             </li>
           ))}

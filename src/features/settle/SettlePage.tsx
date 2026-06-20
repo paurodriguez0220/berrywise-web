@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useBalances } from '../balances/use-balances';
 import { addExpense } from '../../db/expenses';
 import { addSplits } from '../../db/splits';
+import { formatCurrency } from '../../utils/currency';
 
 interface Settlement {
   debtorId: number;
@@ -95,7 +96,7 @@ export function SettlePage(): React.JSX.Element {
                 <span className="text-sm font-medium text-gray-900">
                   {s.debtorName} <span className="text-gray-400">→</span> {s.creditorName}
                 </span>
-                <span className="text-xs text-gray-400">${s.amount.toFixed(2)}</span>
+                <span className="text-xs text-gray-400">{formatCurrency(s.amount)}</span>
               </div>
               <button
                 onClick={() => handleSettle(s)}

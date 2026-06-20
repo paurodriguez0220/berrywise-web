@@ -1,5 +1,6 @@
 import React from 'react';
 import { useBalances } from './use-balances';
+import { formatCurrency } from '../../utils/currency';
 
 export function BalancesPage(): React.JSX.Element {
   const { balances, isLoading, error } = useBalances();
@@ -37,7 +38,7 @@ export function BalancesPage(): React.JSX.Element {
                       : 'text-gray-400'
                   }`}
                 >
-                  {b.net > 0 ? `+$${b.net.toFixed(2)}` : b.net < 0 ? `-$${Math.abs(b.net).toFixed(2)}` : 'Settled'}
+                  {b.net > 0 ? `+${formatCurrency(b.net)}` : b.net < 0 ? `-${formatCurrency(Math.abs(b.net))}` : 'Settled'}
                 </span>
                 <p className="text-xs text-gray-400">
                   {b.net > 0 ? 'is owed' : b.net < 0 ? 'owes' : ''}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { Member } from '../../types';
 import type { NewSplit } from '../../db/splits';
+import { formatCurrency } from '../../utils/currency';
 
 type SplitType = 'equal' | 'custom';
 
@@ -47,7 +48,7 @@ export function AddExpenseModal({ members, onSave, onClose }: AddExpenseModalPro
     }));
     const sum = splits.reduce((acc, s) => acc + s.share, 0);
     if (Math.abs(sum - total) > 0.01) {
-      return `Shares must add up to $${total.toFixed(2)} (current: $${sum.toFixed(2)})`;
+      return `Shares must add up to ${formatCurrency(total)} (current: ${formatCurrency(sum)})`;
     }
     return splits;
   }
