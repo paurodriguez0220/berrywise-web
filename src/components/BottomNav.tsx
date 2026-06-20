@@ -16,7 +16,7 @@ const NAV_ITEMS: NavItem[] = [
   { tab: 'members', label: 'Members', icon: '👥' },
   { tab: 'expenses', label: 'Expenses', icon: '💸' },
   { tab: 'balances', label: 'Balances', icon: '⚖️' },
-  { tab: 'settle', label: 'Settle', icon: '✅' },
+  { tab: 'trends', label: 'Trends', icon: '📈' },
 ];
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps): React.JSX.Element {

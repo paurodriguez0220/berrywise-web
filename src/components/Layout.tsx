@@ -3,9 +3,9 @@ import { BottomNav } from './BottomNav';
 import { MembersPage } from '../features/members/MembersPage';
 import { ExpensesPage } from '../features/expenses/ExpensesPage';
 import { BalancesPage } from '../features/balances/BalancesPage';
-import { SettlePage } from '../features/settle/SettlePage';
+import { TrendsPage } from '../features/trends/TrendsPage';
 
-export type Tab = 'members' | 'expenses' | 'balances' | 'settle';
+export type Tab = 'members' | 'expenses' | 'balances' | 'trends';
 
 export function Layout(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<Tab>('expenses');
@@ -19,7 +19,7 @@ export function Layout(): React.JSX.Element {
         {activeTab === 'members' && <MembersPage />}
         {activeTab === 'expenses' && <ExpensesPage />}
         {activeTab === 'balances' && <BalancesPage />}
-        {activeTab === 'settle' && <SettlePage />}
+        {activeTab === 'trends' && <TrendsPage />}
       </main>
 
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
