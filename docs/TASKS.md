@@ -112,7 +112,7 @@ Track progress by checking off tasks as they are completed.
   - Enable Pages in repo settings (source: `gh-pages` branch)
   - Verify live at `https://paurodriguez0220.github.io/berrywise/`
 
-- [ ] **#19** Test PWA install on iPhone *(blocked by #18)*
+- [x] **#19** Test PWA install on iPhone *(blocked by #18)*
   - Open in Safari → Share → Add to Home Screen
   - Launch from icon: no URL bar, gate screen gone, all 4 tabs work
   - Add a member, log an expense, check balances, settle up
